@@ -76,6 +76,24 @@ public class HudMonitor implements BTLedBar, Runnable {
 	}
 
 	@Override
+	public boolean quickReconnect(){
+		if (connected){
+			//Disconnect, but allow thread to automatically reconnect
+			try {
+				out.close();
+				in.close();
+				conn.close();
+			} catch (IOException e) {
+				elog("Exception trying to disconnect "+e);
+			}
+			//TODO - need a delay here?
+			//OR, omit following line and let main thread doit?
+			return connect(service);
+		}
+		return false;
+	}
+
+	@Override
 	public boolean set(int chan, double value) {
 		//Abort quietly if not connected
 		if (!connected)
