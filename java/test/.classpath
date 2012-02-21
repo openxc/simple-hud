@@ -9,5 +9,7 @@
 			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="output" path="target/classes"/>
+	<classpathentry kind="src" output="bin/classes" path="src/main/java"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hud"/>
+	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

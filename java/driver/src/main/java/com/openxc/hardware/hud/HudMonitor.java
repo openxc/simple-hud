@@ -12,10 +12,9 @@ import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
-import com.buglabs.application.ServiceTrackerHelper.ManagedRunnable;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
-public class HudMonitor implements ManagedRunnable, BTLedBar, Runnable {
+public class HudMonitor implements BTLedBar, Runnable {
 	final long RETRY_DELAY = 1000;		//wait (ms) before retrying
 	final long POLL_DELAY = 3000;		//poll remote device every (ms)
 
@@ -30,7 +29,6 @@ public class HudMonitor implements ManagedRunnable, BTLedBar, Runnable {
 	private String service;
 	private boolean connected;
 
-	@Override
 	public void run(Map<Object, Object> services) {
 		//Get imported service objects
 		readyEvent = new Object();
@@ -41,14 +39,8 @@ public class HudMonitor implements ManagedRunnable, BTLedBar, Runnable {
 		myThread.start();
 		listener = new DeviceListener(localdevice, this);
 		connected = false;
-		//Now that all of our required services are running and we have completed initing
-		//our service, register the BTLedBar service
-		_context.registerService(BTLedBar.class.getName(), this, null);
 	}
 
-
-
-	@Override
 	public void shutdown() {
 		//Force main connection thread to return
 		myThread.interrupt();
