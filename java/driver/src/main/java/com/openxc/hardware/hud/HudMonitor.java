@@ -1,4 +1,4 @@
-package com.buglabs.bt.ledbar;
+package com.openxc.hardware.hud;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,19 +12,15 @@ import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.service.log.LogService;
-
 import com.buglabs.application.ServiceTrackerHelper.ManagedRunnable;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
-public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
+public class HudMonitor implements ManagedRunnable, BTLedBar, Runnable {
 	final long RETRY_DELAY = 1000;		//wait (ms) before retrying
 	final long POLL_DELAY = 3000;		//poll remote device every (ms)
-	
+
 	private LocalDevice localdevice;
-	private LogService ls;
-	private devListener listener;
+	private DeviceListener listener;
 	private Thread myThread;
 	private StreamConnection conn;
 	private PrintWriter out;
@@ -33,30 +29,24 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 	private RemoteDevice dev;
 	private String service;
 	private boolean connected;
-	private BundleContext _context;
-	
-	public ledbarMonitor(BundleContext context){
-		_context = context;
-	}
 
 	@Override
 	public void run(Map<Object, Object> services) {
 		//Get imported service objects
 		readyEvent = new Object();
 		localdevice = (LocalDevice) services.get(LocalDevice.class.getName());
-		ls = (LogService) services.get(LogService.class.getName());
 		ilog("start");
 		//myThread calls run() NOT run(Map<Object, Object> services)
 		myThread = new Thread(this, this.getClass().getSimpleName());
 		myThread.start();
-		listener = new devListener(localdevice, this);
+		listener = new DeviceListener(localdevice, this);
 		connected = false;
 		//Now that all of our required services are running and we have completed initing
 		//our service, register the BTLedBar service
 		_context.registerService(BTLedBar.class.getName(), this, null);
 	}
-	
-	
+
+
 
 	@Override
 	public void shutdown() {
@@ -69,7 +59,7 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 	@Override
 	public void disconnect() {
 		if (connected){
-			//De-asserting connected will stop the main thread from retrying 
+			//De-asserting connected will stop the main thread from retrying
 			connected = false;
 			try {
 				out.close();
@@ -78,7 +68,7 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 			} catch (IOException e) {
 				elog("Exception trying to disconnect "+e);
 			}
-		}			
+		}
 	}
 
 	@Override
@@ -90,7 +80,7 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 		} catch (IOException e) {				//Throws IOException if device is gone
 			return false;
 		}
-		return true; 
+		return true;
 	}
 
 	@Override
@@ -116,7 +106,7 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 				success = false;
 		return success;
 	}
-	
+
 	@Override
 	public boolean fade(int chan, long duration, double value) {
 		//Abort quietly if not connected
@@ -128,7 +118,7 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 		//return verifyResponse(in);	//essentially, just look for "OK"
 		return true;
 	}
-	
+
 	@Override
 	public int rawBatteryLevel() {
 		//Abort quietly if not connected
@@ -143,15 +133,15 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 		}
 		return -1;
 	}
-	
+
 	private boolean authWith(RemoteDevice dev){
 		try {
 			//Only authenticate if we have not paired the device before.
 			if (!RemoteDeviceHelper.implIsAuthenticated(dev))
-				RemoteDeviceHelper.authenticate(dev,"1234");			
+				RemoteDeviceHelper.authenticate(dev,"1234");
 		} catch (IOException e) {
 			elog("Unable to authenticate "+dev.getBluetoothAddress());
-			return false; 
+			return false;
 		}
 		dlog("Attempting to find service string");
 		//Check to make sure the device supports the necessary service
@@ -179,7 +169,7 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 			return false;
 		return authWith(dev);
 	}
-	
+
 	@Override
 	public boolean setMac(String macAddr) {
 		//You need to disconnect() if you want to change to a different device
@@ -194,7 +184,7 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 			return false;
 		return authWith(dev);
 	}
-	
+
 	private boolean connect(String service){
 		//Get the input and output streams/writer/reader
 		try {
@@ -207,13 +197,13 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 				dlog("Error opening streams "+e);
 			} else {
 				elog("Error opening streams "+e);
-			}				
-			return false; 
+			}
+			return false;
 		}
 		connected = true;
 		return true;
 	}
-	
+
 	//Clear any waiting characters from the input buffer.
 	private void inFlush(BufferedReader reader){
 		try {
@@ -222,7 +212,7 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 			}
 		} catch (IOException e) {}	//Disregard exceptions... This is only an attempt to clear the buffer
 	}
-	
+
 	private String getResponse(BufferedReader reader){
 		String line = "";
 		try {
@@ -237,12 +227,13 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 		}
 		return line;
 	}
-	
+
 	//Wrappers for the log service (to standardize logged messages)
-	void ilog(String message){  ls.log(ls.LOG_INFO, this.getClass().getSimpleName()+": "+message);	}
-	void dlog(String message){  ls.log(ls.LOG_DEBUG, this.getClass().getSimpleName()+": "+message);	}
-	void elog(String message){  ls.log(ls.LOG_ERROR, this.getClass().getSimpleName()+": "+message);	}
-	void wlog(String message){  ls.log(ls.LOG_WARNING, this.getClass().getSimpleName()+": "+message);	}
+    // TODO replace this with standard logging or Android logging?
+	void ilog(String message) { }
+	void dlog(String message) { }
+	void elog(String message) { }
+	void wlog(String message) { }
 
 	@Override
 	public void run() {
@@ -270,7 +261,7 @@ public class ledbarMonitor implements ManagedRunnable, BTLedBar, Runnable {
 			}
 			ilog("Device "+dev.getBluetoothAddress()+" has been disconnected!");
 			//If connected was not updated, autoretry
-			//connected = true implies the device disconnected on it's own accord 
+			//connected = true implies the device disconnected on it's own accord
 			if (connected)
 				continue;
 			//If we were specifically disconnected by the service

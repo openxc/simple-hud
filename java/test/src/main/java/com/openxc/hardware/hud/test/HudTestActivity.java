@@ -7,38 +7,17 @@ package btledbartest;
 import java.util.Map;
 
 import com.buglabs.bt.ledbar.BTLedBar;
-import org.osgi.service.log.LogService;
+import android.util.Log;
 
-import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleHudTestActivity;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 
-import com.buglabs.application.ServiceTrackerHelper;
-
-
-/**
- * BundleActivator for BTLedBarTest.  The OSGi entry point to the application.
- *
- */
-public class Activator implements BundleActivator {
+public class HudTestActivity extends Activity {
 	final long PERIOD = 500;
-    /**
-	 * OSGi services the application depends on.
-	 */
-	private static final String [] services = {		
-		BTLedBar.class.getName(),		
-		LogService.class.getName(),
-	};	
-	private ServiceTracker serviceTracker;
-	private LogService ls;
 	private BTLedBar btledbar;
 	private Object stop;
 	private blinker blink;
-	
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
+
 	public class blinker implements Runnable {
 		private Thread t;
 		public blinker(){
@@ -46,7 +25,7 @@ public class Activator implements BundleActivator {
 			t.start();
 		}
 		public void stop(){
-			t.interrupt(); 
+			t.interrupt();
 		}
 		@Override
 		public void run() {
@@ -65,29 +44,29 @@ public class Activator implements BundleActivator {
 			}
 		}
 	}
-	
+
 	public void start(BundleContext context) throws Exception {
 		serviceTracker = ServiceTrackerHelper.openServiceTracker(context, services, new ServiceTrackerHelper.ManagedInlineRunnable() {
-			
+
 			@Override
-			public void run(Map<Object, Object> services) {			
-				btledbar = (BTLedBar) services.get(BTLedBar.class.getName());			
+			public void run(Map<Object, Object> services) {
+				btledbar = (BTLedBar) services.get(BTLedBar.class.getName());
 				ls = (LogService) services.get(LogService.class.getName());
 				ls.log(ls.LOG_INFO, "Connecting to \"RN42\"");
-				
+
 				//repeatedly call setName until a device containing the text
-				//"FireFly" is found. 
+				//"FireFly" is found.
 				while(!btledbar.setMac("000666430D08")){
 					ls.log(ls.LOG_INFO, "Couldn't find device, retrying");
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) { return; }
 				}
-				
+
 				ls.log(ls.LOG_INFO, "Connected, toggling LED");
 				blink = new blinker();
 			}
-			
+
 			@Override
 			public void shutdown() {
 				blink.stop();
@@ -100,16 +79,4 @@ public class Activator implements BundleActivator {
 		});
 
 	}
-
-    /*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(BundleContext context) throws Exception {
-	
-		//Will cause the ManagedRunnable.shutdown() to be called.
-		serviceTracker.close();
-	}
-	
-	
 }

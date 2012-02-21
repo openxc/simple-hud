@@ -1,0 +1,5 @@
+target/
+gen/
+bin/
+*.class
+.settings/

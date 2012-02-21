@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.openxc.hardware</groupId>
+        <artifactId>hud-parent</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <artifactId>hud-test</artifactId>
+    <packaging>apk</packaging>
+    <name>Bluetooth HUD - App Test</name>
+    <dependencies>
+        <dependency>
+            <groupId>android</groupId>
+            <artifactId>android</artifactId>
+            <version>3.1_r3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.openxc.hardware</groupId>
+            <artifactId>hud</artifactId>
+            <version>${project.version}</version>
+            <type>apklib</type>
+        </dependency>
+    </dependencies>
+</project>

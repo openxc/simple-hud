@@ -1,4 +1,4 @@
-package com.buglabs.bt.ledbar;
+package com.openxc.hardware.hud;
 
 import java.io.IOException;
 import java.util.jar.Attributes.Name;
@@ -12,28 +12,26 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
 
-import org.osgi.service.log.LogService;
-
 import com.intel.bluetooth.RemoteDeviceHelper;
 
-public class devListener implements DiscoveryListener {
+public class DeviceListener implements DiscoveryListener {
 	private LocalDevice localdevice;
 	private DiscoveryAgent agent;
-	private ledbarMonitor app;
+	private HudMonitor app;
 	private String target;
 	private RemoteDevice foundDev;
 	private String service;
 	private String mac;
 	private boolean resolveNames;
 	public Object searchComplete;
-	
-	public devListener(LocalDevice localBTDevice, ledbarMonitor callingObject){
+
+	public DeviceListener(LocalDevice localBTDevice, HudMonitor callingObject){
 		app = callingObject;
 		searchComplete = new Object();
 		localdevice = localBTDevice;
 		agent = localBTDevice.getDiscoveryAgent();
 	}
-	
+
 	//Where all the magic happens:
 	public RemoteDevice discoverDevice(String search, boolean resolveName){
 		foundDev = null;
@@ -46,7 +44,7 @@ public class devListener implements DiscoveryListener {
 				return null;
 			}
 		} catch (BluetoothStateException e) {
-			app.elog("Bluetooth adapter is in invalid state: "+e); 
+			app.elog("Bluetooth adapter is in invalid state: "+e);
 			return null;
 		}
 		app.dlog("Waiting for discovery to complete");
@@ -64,7 +62,7 @@ public class devListener implements DiscoveryListener {
 		}
 		return foundDev;
 	}
-	
+
 	public String getSPPService(RemoteDevice foundDev){
 		service = null;
 		app.dlog("Scanning services on "+foundDev.getBluetoothAddress());
@@ -77,7 +75,7 @@ public class devListener implements DiscoveryListener {
 		try {
 			agent.searchServices(attrIDs, uuidSet, foundDev, this);
 		} catch (BluetoothStateException e) {
-			app.elog("Bluetooth adapter is in invalid state: "+e); 
+			app.elog("Bluetooth adapter is in invalid state: "+e);
 			return null;
 		}
 		app.dlog("Waiting for service scan to complete");
@@ -95,7 +93,7 @@ public class devListener implements DiscoveryListener {
 		}
 		return service;
 	}
-	
+
 	@Override
 	public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
 		String name = "";
@@ -116,7 +114,7 @@ public class devListener implements DiscoveryListener {
 				app.dlog("Found matching device "+target);
 			}
 		}
-		
+
 	}
 
 	@Override
