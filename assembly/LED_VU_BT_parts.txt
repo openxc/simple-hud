@@ -1,0 +1,81 @@
+Partlist
+
+Exported from LED_VU_BT.sch at 8/15/11 1:40 PM
+
+EAGLE Version 5.11.0 Copyright (c) 1988-2010 CadSoft
+
+Part     Value                  Device                    Package        Library        Sheet
+
+C1       0.1u                   CAP0805                   0805           SparkFun       1
+C2       24p                    CAP0805                   0805           SparkFun       1
+C3       24p                    CAP0805                   0805           SparkFun       1
+C4       0.1u                   CAP0805                   0805           SparkFun       1
+C5       22uF                   CAP0805                   0805           SparkFun       1
+C6       0.1uF                  CAP0805                   0805           SparkFun       1
+C7       0.1uF                  CAP0805                   0805           SparkFun       1
+C8       10uF                   CAP0805                   0805           SparkFun       1
+C9       22uF                   CAP0805                   0805           SparkFun       1
+C10      4.7uF                  CAP0805                   0805           SparkFun       1
+C11      0.1uF                  CAP0805                   0805           SparkFun       1
+C12      0.1uF                  CAP0805                   0805           SparkFun       1
+C13      0.1uF                  CAP0805                   0805           SparkFun       1
+CN1                             DCBARRELPTH               DCJACK_2MM_PTH adafruit       1
+D1                              DIODEPOWERDI123           POWERDI123     BUG            1
+D2                              DIODEPOWERDI123           POWERDI123     BUG            1
+IC1      BLUETOOTH-RN41-NORFGND BLUETOOTH-RN41-NORFGND    RN41_NORFPAD   00TergSparkfun 1
+IC2      MEGA8-AI               MEGA8-AI                  TQFP32-08      atmel          1
+J1                              AVR_SPI_PRG_6PTH          2X3            SparkFun       1
+JP1      LiPo                   M02-JST-2MM-SMT           JST-2-SMD      SparkFun       1
+L1       4.7uH, 1.2A            INDUCTOR.                 CDRH2D09       SparkFun       1
+LED1A                           LEDCHIPLED_0805           CHIPLED_0805   adafruit       1
+LED1B                           LEDCHIPLED_0805           CHIPLED_0805   adafruit       1
+LED2A                           LEDCHIPLED_0805           CHIPLED_0805   adafruit       1
+LED2B                           LEDCHIPLED_0805           CHIPLED_0805   adafruit       1
+LED3A                           LEDCHIPLED_0805           CHIPLED_0805   adafruit       1
+LED3B                           LEDCHIPLED_0805           CHIPLED_0805   adafruit       1
+LED4A                           LEDCHIPLED_0805           CHIPLED_0805   adafruit       1
+LED4B                           LEDCHIPLED_0805           CHIPLED_0805   adafruit       1
+LED5A                           LEDCHIPLED_0805           CHIPLED_0805   adafruit       1
+LED5B                           LEDCHIPLED_0805           CHIPLED_0805   adafruit       1
+LED6                            LEDCHIPLED_0805           CHIPLED_0805   adafruit       1
+LED7                            LEDCHIPLED_0805           CHIPLED_0805   adafruit       1
+Q1       16MHz                  CRYSTAL                   HC49USX        BUG            1
+Q2                              TRANSISTOR_PNPSMD         SOT23-3        SparkFun       1
+Q3                              TRANSISTOR_PNPSMD         SOT23-3        SparkFun       1
+Q4                              TRANSISTOR_PNPSMD         SOT23-3        SparkFun       1
+Q5                              TRANSISTOR_PNPSMD         SOT23-3        SparkFun       1
+Q6                              TRANSISTOR_PNPSMD         SOT23-3        SparkFun       1
+R1       75                     RESISTOR0805-RES          0805           BUG            1
+R2       75                     RESISTOR0805-RES          0805           BUG            1
+R3       75                     RESISTOR0805-RES          0805           BUG            1
+R4       75                     RESISTOR0805-RES          0805           BUG            1
+R5       75                     RESISTOR0805-RES          0805           BUG            1
+R6       75                     RESISTOR0805-RES          0805           BUG            1
+R7       75                     RESISTOR0805-RES          0805           BUG            1
+R8       75                     RESISTOR0805-RES          0805           BUG            1
+R9       75                     RESISTOR0805-RES          0805           BUG            1
+R10      75                     RESISTOR0805-RES          0805           BUG            1
+R11      10k                    RESISTOR0805-RES          0805           BUG            1
+R12      220                    RESISTOR0805-RES          0805           BUG            1
+R13      470                    RESISTOR0805-RES          0805           SparkFun       1
+R14      2k                     RESISTOR0805-RES          0805           SparkFun       1
+R15      2M                     RESISTOR0805-RES          0805           SparkFun       1
+R16      220k                   RESISTOR0805-RES          0805           SparkFun       1
+R17      1.2M                   RESISTOR0805-RES          0805           SparkFun       1
+R18      220k                   RESISTOR0805-RES          0805           SparkFun       1
+R19      3.3k                   RESISTOR0805-RES          0805           BUG            1
+R20      3.3k                   RESISTOR0805-RES          0805           BUG            1
+R21      3.3k                   RESISTOR0805-RES          0805           BUG            1
+R22      3.3k                   RESISTOR0805-RES          0805           BUG            1
+R23      3.3k                   RESISTOR0805-RES          0805           BUG            1
+R24      1.2M                   RESISTOR0805-RES          0805           BUG            1
+R25      1.2M                   RESISTOR0805-RES          0805           BUG            1
+SJ1                             SOLDERJUMPER_2WAYPASTE1&2 SJ_3_PASTE1&2  SparkFun       1
+SJ2                             SOLDERJUMPER_2WAYPASTE1&2 SJ_3_PASTE1&2  SparkFun       1
+SJ3                             SOLDERJUMPER_2WAYPASTE1&2 SJ_3_PASTE1&2  SparkFun       1
+SJ4                             SOLDERJUMPER_2WAYPASTE1&2 SJ_3_PASTE1&2  SparkFun       1
+SJ5                             SOLDERJUMPER_2WAYPASTE1&2 SJ_3_PASTE1&2  SparkFun       1
+SJ6                             SOLDERJUMPERNO            SJ_2S-NO       SparkFun       1
+U1       MCP73831               MCP73831                  SOT23-5        SparkFun       1
+U2       TPS61200               TPS61200                  QFN-10_PAD     SparkFun       1
+X2       USBSMD                 USBSMD                    USB-MINIB      SparkFun       1
