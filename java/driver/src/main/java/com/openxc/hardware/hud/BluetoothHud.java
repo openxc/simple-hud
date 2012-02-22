@@ -1,4 +1,4 @@
-package com.buglabs.bt.ledbar;
+package com.openxc.hardware.hud;
 
 public interface BluetoothHud {
 
