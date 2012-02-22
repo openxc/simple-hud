@@ -14,7 +14,7 @@ import javax.microedition.io.StreamConnection;
 
 import com.intel.bluetooth.RemoteDeviceHelper;
 
-public class HudMonitor implements BTLedBar, Runnable {
+public class HudMonitor implements BluetoothHud, Runnable {
 	final long RETRY_DELAY = 1000;		//wait (ms) before retrying
 	final long POLL_DELAY = 3000;		//poll remote device every (ms)
 

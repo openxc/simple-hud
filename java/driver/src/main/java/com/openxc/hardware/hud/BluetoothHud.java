@@ -1,6 +1,6 @@
 package com.buglabs.bt.ledbar;
 
-public interface BTLedBar {
+public interface BluetoothHud {
 
     /**
      * Initiate a bluetooth discovery, searching for a device by it's
