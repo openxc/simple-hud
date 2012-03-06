@@ -1,3 +1,3 @@
 package com.openxc.hardware.hud;
 
-public class BluetoothException { }
+public class BluetoothException extends Exception { }
