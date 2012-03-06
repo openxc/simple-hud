@@ -20,20 +20,17 @@ import android.content.Intent;
 
 import android.util.Log;
 
-public class DeviceListener {
-    private final static String TAG = "DeviceListener";
+public class DeviceManager {
+    private final static String TAG = "DeviceManager";
     private final static int REQUEST_ENABLE_BT = 42;
     private final static UUID RFCOMM_UUID = new UUID(0x00, 0x03);
-	private String mTargetMac;
     private Activity mActivity;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothSocket mSocket;
     private BluetoothDevice mTargetDevice;
     private BroadcastReceiver mReceiver;
 
-	public DeviceListener(Activity activity, String targetMac)
-            throws BluetoothException {
-        mTargetMac = targetMac;
+    public DeviceManager(Activity activity) throws BluetoothException {
         mActivity = activity;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if(mBluetoothAdapter == null) {
@@ -45,12 +42,14 @@ public class DeviceListener {
                     BluetoothAdapter.ACTION_REQUEST_ENABLE);
             mActivity.startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BT);
         }
-	}
+    }
 
-	public void discoverDevices(String search){
+    public void discoverDevices(final String targetAddress) {
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         for(BluetoothDevice device : pairedDevices) {
-            deviceDiscovered(device);
+            if(deviceDiscovered(device, targetAddress)) {
+                captureDevice(device);
+            }
         }
 
         mReceiver = new BroadcastReceiver() {
@@ -58,7 +57,9 @@ public class DeviceListener {
                 if(BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
                     BluetoothDevice device = intent.getParcelableExtra(
                             BluetoothDevice.EXTRA_DEVICE);
-                    deviceDiscovered(device);
+                    if(deviceDiscovered(device, targetAddress)) {
+                        captureDevice(device);
+                    }
                 }
             }
         };
@@ -67,40 +68,55 @@ public class DeviceListener {
             IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
             mActivity.registerReceiver(mReceiver, filter);
         }
-	}
+    }
 
-	public BluetoothSocket setupSocket(BluetoothDevice device)
-            throws BluetoothException {
-		Log.d(TAG, "Scanning services on " + device);
+    public BluetoothSocket setupSocket() throws BluetoothException {
+        if(mTargetDevice == null) {
+            Log.w(TAG, "Can't setup socket -- device is " + mTargetDevice);
+            throw new BluetoothException();
+        }
+
+        Log.d(TAG, "Scanning services on " + mTargetDevice);
         try {
-            mSocket = device.createRfcommSocketToServiceRecord(RFCOMM_UUID);
+            mSocket = mTargetDevice.createRfcommSocketToServiceRecord(RFCOMM_UUID);
         } catch(IOException e) {}
 
-        mActivity.unregisterReceiver(mReceiver);
-        mBluetoothAdapter.cancelDiscovery();
 
         try {
             mSocket.connect();
             return mSocket;
         } catch(IOException e) {
-			Log.e(TAG, "Could not find required service on " + device);
+            Log.e(TAG, "Could not find required service on " + mTargetDevice);
             try {
                 mSocket.close();
             } catch(IOException e2) {}
             throw new BluetoothException();
         }
-	}
+    }
 
-	public void deviceDiscovered(BluetoothDevice device) {
-		Log.d(TAG, "Found Bluetooth device: " + device);
-        if(device.getAddress() == mTargetMac) {
-            Log.d(TAG, "Found matching device: " + device);
-            mTargetDevice = device;
-            try {
-            setupSocket(device);
-            } catch(BluetoothException e) {
-                Log.w(TAG, "Couldn't open socket with " + device, e);
+    public void waitForDevice() {
+        synchronized(mTargetDevice) {
+            while(mTargetDevice == null) {
+                try {
+                    mTargetDevice.wait();
+                } catch(InterruptedException e) {}
             }
         }
-	}
+    }
+
+    private void captureDevice(BluetoothDevice device) {
+        mTargetDevice = device;
+        mActivity.unregisterReceiver(mReceiver);
+        mBluetoothAdapter.cancelDiscovery();
+    }
+
+    private boolean deviceDiscovered(BluetoothDevice device,
+            String targetAddress) {
+        Log.d(TAG, "Found Bluetooth device: " + device);
+        if(device.getAddress() == targetAddress) {
+            Log.d(TAG, "Found matching device: " + device);
+            return true;
+        }
+        return false;
+    }
 }
