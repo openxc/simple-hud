@@ -13,8 +13,9 @@
     <name>Bluetooth HUD - Driver</name>
     <dependencies>
         <dependency>
-            <groupId>net.sf.bluecove</groupId>
-            <artifactId>bluecove</artifactId>
+            <groupId>com.google.android</groupId>
+            <artifactId>android</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

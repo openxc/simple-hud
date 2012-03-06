@@ -13,9 +13,13 @@
     <name>Bluetooth HUD - App Test</name>
     <dependencies>
         <dependency>
-            <groupId>android</groupId>
+            <groupId>com.google.android</groupId>
             <artifactId>android</artifactId>
-            <version>3.1_r3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android-test</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
