@@ -12,6 +12,7 @@
               <category android:name="android.intent.category.LAUNCHER" />
           </intent-filter>
       </activity>
+  <service android:name="com.openxc.hardware.hud.HudService"/>
   </application>
 
   <supports-screens android:largeScreens="true" android:xlargeScreens="true"
