@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>hud</artifactId>
-    <packaging>jar</packaging>
+    <packaging>apklib</packaging>
     <name>Bluetooth HUD - Driver</name>
     <dependencies>
         <dependency>
