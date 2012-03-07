@@ -28,10 +28,7 @@ public class HudService extends Service implements BluetoothHudInterface {
     private BufferedReader mInStream;
     private BluetoothSocket mSocket;
 
-    // This is the object that receives interactions from clients.  See
-    // RemoteService for a more complete example.
     private final IBinder mBinder = new LocalBinder();
-
     public class LocalBinder extends Binder {
         public HudService getService() {
             return HudService.this;
@@ -143,8 +140,8 @@ public class HudService extends Service implements BluetoothHudInterface {
         }
         mDeviceManager.connect(targetAddress);
 
-        mConnectionKeepalive = new ConnectionKeepalive();
-        new Thread(mConnectionKeepalive).start();
+        // mConnectionKeepalive = new ConnectionKeepalive();
+        // new Thread(mConnectionKeepalive).start();
     }
 
     private void connectSocket() throws BluetoothException {

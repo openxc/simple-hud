@@ -60,13 +60,17 @@ public class HudTestActivity extends Activity {
     private ServiceConnection mConnection = new ServiceConnection () {
         public void onServiceConnected(ComponentName classNAme, IBinder service) {
             mService = ((HudService.LocalBinder)service).getService();
-            try {
-                mService.connect(HUD_MAC_ADDRESS);
-            } catch(BluetoothException e) {
-                Log.w(TAG, "Unable to connect to Bluetooth device with " +
-                        "address: " + HUD_MAC_ADDRESS);
-            }
-            new Thread(mBlinker).start();
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        mService.connect(HUD_MAC_ADDRESS);
+                    } catch(BluetoothException e) {
+                        Log.w(TAG, "Unable to connect to Bluetooth device with " +
+                                "address: " + HUD_MAC_ADDRESS);
+                    }
+                    new Thread(mBlinker).start();
+                }
+            }).start();
         }
 
         public void onServiceDisconnected(ComponentName className) {

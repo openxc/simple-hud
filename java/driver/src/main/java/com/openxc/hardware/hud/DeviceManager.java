@@ -48,8 +48,10 @@ public class DeviceManager {
     }
 
     public void discoverDevices(final String targetAddress) {
+        Log.d(TAG, "Starting device discovery");
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         for(BluetoothDevice device : pairedDevices) {
+            Log.d(TAG, "Found already paired device: " + device);
             if(deviceDiscovered(device, targetAddress)) {
                 captureDevice(device);
             }
@@ -60,17 +62,16 @@ public class DeviceManager {
                 if(BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
                     BluetoothDevice device = intent.getParcelableExtra(
                             BluetoothDevice.EXTRA_DEVICE);
-                    if(deviceDiscovered(device, targetAddress)) {
+                    if (device.getBondState() != BluetoothDevice.BOND_BONDED
+                            && deviceDiscovered(device, targetAddress)) {
                         captureDevice(device);
                     }
                 }
             }
         };
 
-        if(mTargetDevice == null) {
-            IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-            mContext.registerReceiver(mReceiver, filter);
-        }
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        mContext.registerReceiver(mReceiver, filter);
     }
 
     public BluetoothSocket setupSocket() throws BluetoothException {
