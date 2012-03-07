@@ -1,43 +1,69 @@
 package com.openxc.hardware.hud;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
-import android.app.Activity;
+import android.app.Service;
 
 import android.bluetooth.BluetoothSocket;
 
+import android.content.Intent;
+
+import android.os.Binder;
+import android.os.IBinder;
+
 import android.util.Log;
 
-public class BluetoothHud implements BluetoothHudInterface, Runnable {
-    private final static String TAG = "HudMonitor";
+public class HudService extends Service implements BluetoothHudInterface {
+    private final String TAG = "HudService";
     private final long RETRY_DELAY = 1000;
     private final long POLL_DELAY = 3000;
 
-    private DeviceManager mDeviceManager;
-    private Thread myThread;
     private boolean connected;
-    private BluetoothSocket mSocket;
+    private DeviceManager mDeviceManager;
     private PrintWriter mOutStream;
     private BufferedReader mInStream;
+    private BluetoothSocket mSocket;
 
-    public BluetoothHud(Activity activity, String targetAddress) throws BluetoothException {
-        Log.i(TAG, "start");
-        myThread = new Thread(this, this.getClass().getSimpleName());
-        myThread.start();
-        mDeviceManager = new DeviceManager(activity);
-        mDeviceManager.discoverDevices(targetAddress);
+    // This is the object that receives interactions from clients.  See
+    // RemoteService for a more complete example.
+    private final IBinder mBinder = new LocalBinder();
+
+    public class LocalBinder extends Binder {
+        public HudService getService() {
+            return HudService.this;
+        }
+    }
+
+    @Override
+    public void onCreate() {
+        try {
+            mDeviceManager = new DeviceManager(this);
+        } catch(BluetoothException e) {
+            Log.w(TAG, "Unable to open Bluetooth device manager", e);
+        }
         connected = false;
     }
 
-    public void shutdown() {
-        //Force main connection thread to return
-        myThread.interrupt();
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(TAG, "Received start id " + startId + ": " + intent);
+        // We want this service to continue running until it is explicitly
+        // stopped, so return sticky.
+        return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
         disconnect();
-        Log.i(TAG, "stop");
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
     }
 
     @Override
@@ -53,11 +79,6 @@ public class BluetoothHud implements BluetoothHudInterface, Runnable {
                 mSocket.close();
             } catch(IOException e) { }
         }
-    }
-
-    @Override
-    public boolean online() {
-        return mSocket != null && mSocket.isConnected();
     }
 
     @Override
@@ -112,7 +133,15 @@ public class BluetoothHud implements BluetoothHudInterface, Runnable {
         return -1;
     }
 
-    private boolean connect() throws BluetoothException {
+    @Override
+    public void connect(String targetAddress) throws BluetoothException {
+        if(mConnectionKeepalive != null) {
+            mConnectionKeepalive.stop();
+        }
+        mConnectionKeepalive = new ConnectionKeepalive(targetAddress);
+        new Thread(mConnectionKeepalive).start();
+
+        mDeviceManager.connect(targetAddress);
         try {
             mSocket = mDeviceManager.setupSocket();
             mOutStream = new PrintWriter(new OutputStreamWriter(mSocket.getOutputStream()));
@@ -127,8 +156,54 @@ public class BluetoothHud implements BluetoothHudInterface, Runnable {
                 Log.e(TAG, "Error opening streams "+e);
             }
             connected = false;
+            throw new BluetoothException();
         }
-        return connected;
+    }
+
+    @Override
+    public boolean online() {
+        // TODO
+        return mSocket != null; // && mSocket.isConnected();
+    }
+
+    private ConnectionKeepalive mConnectionKeepalive;
+    private class ConnectionKeepalive implements Runnable {
+        private String mTargetAddress;
+        private boolean mRunning;
+
+        public ConnectionKeepalive(String targetAddress) {
+            mTargetAddress = targetAddress;
+            mRunning = true;
+        }
+
+        public void stop() {
+            mRunning = false;
+        }
+
+        public void run() {
+            while(mRunning) {
+                try {
+                    connect(mTargetAddress);
+                } catch(BluetoothException e) {
+                    Log.w(TAG, "Unable to connect", e);
+                    try {
+                        Thread.sleep(RETRY_DELAY);
+                    } catch(InterruptedException e2) {
+                        return;
+                    }
+                    continue;
+                }
+
+                // ping device while we are connected
+                while(online()){
+                    try {
+                        Thread.sleep(POLL_DELAY);
+                    } catch (InterruptedException e) {return;}
+                }
+
+                Log.i(TAG, "Socket " + mSocket + " has been disconnected!");
+            }
+        }
     }
 
     //Clear any waiting characters from the input buffer.
@@ -153,33 +228,5 @@ public class BluetoothHud implements BluetoothHudInterface, Runnable {
             return null;
         }
         return line;
-    }
-
-    @Override
-    public void run() {
-        Log.d(TAG, "Main thread start - wait for readyEvent");
-        while(true) {
-            mDeviceManager.waitForDevice();
-            Log.d(TAG, "Connecting to remote service");
-            try {
-                if (!connect()){
-                    try {
-                        Thread.sleep(RETRY_DELAY);
-                    } catch (InterruptedException e) {return;}
-                    continue;
-                }
-            } catch(BluetoothException e) {
-                Log.w(TAG, "Unable to connect", e);
-            }
-
-            //ping device while we are connected
-            while(online()){
-                try {
-                    Thread.sleep(POLL_DELAY);
-                } catch (InterruptedException e) {return;}
-            }
-
-            Log.i(TAG, "Socket " + mSocket + " has been disconnected!");
-        }
     }
 }

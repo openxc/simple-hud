@@ -1,6 +1,9 @@
 package com.openxc.hardware.hud.test;
 
-import java.util.Map;
+import com.openxc.hardware.hud.BluetoothException;
+import com.openxc.hardware.hud.HudService;
+
+import android.bluetooth.BluetoothAdapter;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -15,6 +18,8 @@ public class HudTestActivity extends Activity {
     private final static String TAG = "HudTest";
 	private final long PERIOD = 500;
     private final String HUD_MAC_ADDRESS = "000666430D08";
+    private final static int REQUEST_ENABLE_BT = 42;
+
     private HudService mService;
 	private Blinker mBlinker;
     private boolean mIsBound;
@@ -43,7 +48,9 @@ public class HudTestActivity extends Activity {
 						Thread.sleep(PERIOD+Math.round(PERIOD/10));
 					} catch (InterruptedException e) {return;}
 				}
-				Log.d(TAG, "Raw battery level: "+mService.rawBatteryLevel());
+                try {
+                    Log.d(TAG, "Raw battery level: " + mService.rawBatteryLevel());
+                } catch(BluetoothException e) { }
 			}
 		}
 	};
@@ -51,8 +58,13 @@ public class HudTestActivity extends Activity {
     private ServiceConnection mConnection = new ServiceConnection () {
         public void onServiceConnected(ComponentName classNAme, IBinder service) {
             mService = ((HudService.LocalBinder)service).getService();
-            mService.setMac(HUD_MAC_ADDRESS);
-            mBlinker.start();
+            try {
+                mService.connect(HUD_MAC_ADDRESS);
+            } catch(BluetoothException e) {
+                Log.w(TAG, "Unable to connect to Bluetooth device with " +
+                        "address: " + HUD_MAC_ADDRESS);
+            }
+            new Thread(mBlinker).start();
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -77,6 +89,17 @@ public class HudTestActivity extends Activity {
     @Override
     public void onResume() {
         mBlinker = new Blinker();
+
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(bluetoothAdapter == null) {
+            Log.w(TAG, "Unable to open Bluetooth adapter");
+        } else {
+            if(!bluetoothAdapter.isEnabled()) {
+                Intent enableBluetoothIntent = new Intent(
+                        BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BT);
+            }
+        }
     }
 
     @Override

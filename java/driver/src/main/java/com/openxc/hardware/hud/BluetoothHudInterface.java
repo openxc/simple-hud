@@ -66,4 +66,6 @@ public interface BluetoothHudInterface {
      * In order to re-establish a connection, connect() must be called.
      */
     public void disconnect();
+
+    public void connect(String targetAddress) throws BluetoothException;
 }

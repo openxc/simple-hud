@@ -7,8 +7,6 @@ import java.util.UUID;
 
 import com.openxc.hardware.hud.BluetoothException;
 
-import android.app.Activity;
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -22,26 +20,24 @@ import android.util.Log;
 
 public class DeviceManager {
     private final static String TAG = "DeviceManager";
-    private final static int REQUEST_ENABLE_BT = 42;
     private final static UUID RFCOMM_UUID = new UUID(0x00, 0x03);
-    private Activity mActivity;
+
+    private Context mContext;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothSocket mSocket;
     private BluetoothDevice mTargetDevice;
     private BroadcastReceiver mReceiver;
 
-    public DeviceManager(Activity activity) throws BluetoothException {
-        mActivity = activity;
+    public DeviceManager(Context context) throws BluetoothException {
+        mContext = context;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if(mBluetoothAdapter == null) {
             throw new BluetoothException();
         }
+    }
 
-        if(!mBluetoothAdapter.isEnabled()) {
-            Intent enableBluetoothIntent = new Intent(
-                    BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            mActivity.startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BT);
-        }
+    public boolean connected() {
+        return mTargetDevice != null;
     }
 
     public void discoverDevices(final String targetAddress) {
@@ -66,7 +62,7 @@ public class DeviceManager {
 
         if(mTargetDevice == null) {
             IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-            mActivity.registerReceiver(mReceiver, filter);
+            mContext.registerReceiver(mReceiver, filter);
         }
     }
 
@@ -94,7 +90,8 @@ public class DeviceManager {
         }
     }
 
-    public void waitForDevice() {
+    public void connect(String targetAddress) {
+        discoverDevices(targetAddress);
         synchronized(mTargetDevice) {
             while(mTargetDevice == null) {
                 try {
@@ -106,7 +103,7 @@ public class DeviceManager {
 
     private void captureDevice(BluetoothDevice device) {
         mTargetDevice = device;
-        mActivity.unregisterReceiver(mReceiver);
+        mContext.unregisterReceiver(mReceiver);
         mBluetoothAdapter.cancelDiscovery();
     }
 
