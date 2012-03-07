@@ -141,10 +141,13 @@ public class HudService extends Service implements BluetoothHudInterface {
         if(mConnectionKeepalive != null) {
             mConnectionKeepalive.stop();
         }
-        mConnectionKeepalive = new ConnectionKeepalive(targetAddress);
-        new Thread(mConnectionKeepalive).start();
-
         mDeviceManager.connect(targetAddress);
+
+        mConnectionKeepalive = new ConnectionKeepalive();
+        new Thread(mConnectionKeepalive).start();
+    }
+
+    private void connectSocket() throws BluetoothException {
         try {
             mSocket = mDeviceManager.setupSocket();
             mOutStream = new PrintWriter(new OutputStreamWriter(mSocket.getOutputStream()));
@@ -171,11 +174,9 @@ public class HudService extends Service implements BluetoothHudInterface {
 
     private ConnectionKeepalive mConnectionKeepalive;
     private class ConnectionKeepalive implements Runnable {
-        private String mTargetAddress;
         private boolean mRunning;
 
-        public ConnectionKeepalive(String targetAddress) {
-            mTargetAddress = targetAddress;
+        public ConnectionKeepalive() {
             mRunning = true;
         }
 
@@ -186,9 +187,9 @@ public class HudService extends Service implements BluetoothHudInterface {
         public void run() {
             while(mRunning) {
                 try {
-                    connect(mTargetAddress);
+                    connectSocket();
                 } catch(BluetoothException e) {
-                    Log.w(TAG, "Unable to connect", e);
+                    Log.w(TAG, "Unable to connect to socket", e);
                     try {
                         Thread.sleep(RETRY_DELAY);
                     } catch(InterruptedException e2) {
