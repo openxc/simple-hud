@@ -72,6 +72,11 @@ public class DeviceManager {
 
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         mContext.registerReceiver(mReceiver, filter);
+
+        if(mBluetoothAdapter.isDiscovering()) {
+            mBluetoothAdapter.cancelDiscovery();
+        }
+        mBluetoothAdapter.startDiscovery();
     }
 
     public BluetoothSocket setupSocket() throws BluetoothException {
