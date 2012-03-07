@@ -2,6 +2,10 @@ package com.openxc.hardware.hud;
 
 import java.io.IOException;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,6 +30,9 @@ public class DeviceManager {
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothSocket mSocket;
     private BluetoothDevice mTargetDevice;
+    private final Lock mDeviceLock = new ReentrantLock();
+    private final Condition mDeviceChangedCondition =
+            mDeviceLock.newCondition();
     private BroadcastReceiver mReceiver;
 
     public DeviceManager(Context context) throws BluetoothException {
@@ -92,24 +99,28 @@ public class DeviceManager {
 
     public void connect(String targetAddress) {
         discoverDevices(targetAddress);
-        synchronized(mTargetDevice) {
-            while(mTargetDevice == null) {
-                try {
-                    mTargetDevice.wait();
-                } catch(InterruptedException e) {}
-            }
+        mDeviceLock.lock();
+        while(mTargetDevice == null) {
+            try {
+                mDeviceChangedCondition.await();
+            } catch(InterruptedException e) {}
         }
+        mDeviceLock.unlock();
     }
 
     private void captureDevice(BluetoothDevice device) {
+        mDeviceLock.lock();
         mTargetDevice = device;
+        mTargetDevice.notifyAll();
+        mDeviceLock.unlock();
+
         mContext.unregisterReceiver(mReceiver);
         mBluetoothAdapter.cancelDiscovery();
     }
 
     private boolean deviceDiscovered(BluetoothDevice device,
             String targetAddress) {
-        Log.d(TAG, "Found Bluetooth device: " + device);
+        Log.d(TAG, "Found Bluetooth device: " + device.getAddress());
         if(device.getAddress() == targetAddress) {
             Log.d(TAG, "Found matching device: " + device);
             return true;

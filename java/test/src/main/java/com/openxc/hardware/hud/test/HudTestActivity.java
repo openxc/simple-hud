@@ -17,7 +17,7 @@ import android.app.Activity;
 public class HudTestActivity extends Activity {
     private final static String TAG = "HudTest";
 	private final long PERIOD = 500;
-    private final String HUD_MAC_ADDRESS = "000666430D08";
+    private final String HUD_MAC_ADDRESS = "00:06:66:43:0D:08";
     private final static int REQUEST_ENABLE_BT = 42;
 
     private HudService mService;
