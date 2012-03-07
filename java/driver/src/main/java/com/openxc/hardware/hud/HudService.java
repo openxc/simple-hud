@@ -58,17 +58,20 @@ public class HudService extends Service implements BluetoothHudInterface {
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "Being destroyed");
         disconnect();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(TAG, "Binding from " + intent);
         return mBinder;
     }
 
     @Override
     public void disconnect() {
         if(connected) {
+            Log.d(TAG, "Disconnecting from the socket " + mSocket);
             connected = false;
             mOutStream.close();
             try {

@@ -29,8 +29,10 @@ public class HudTestActivity extends Activity {
 
 		public void stop() {
             mRunning = false;
-            mService.setAll(0.0);
-            mService.disconnect();
+            if(mService != null) {
+                mService.setAll(0.0);
+                mService.disconnect();
+            }
 		}
 
 		@Override
@@ -74,6 +76,7 @@ public class HudTestActivity extends Activity {
     };
 
     private void bindService() {
+        Log.d(TAG, "Binding to HudService");
         bindService(new Intent(this, HudService.class),
                 mConnection, Context.BIND_AUTO_CREATE);
         mIsBound = true;
@@ -81,6 +84,7 @@ public class HudTestActivity extends Activity {
 
     private void unbindService() {
         if(mIsBound) {
+            Log.d(TAG, "Unbinding from HudService");
             unbindService(mConnection);
             mIsBound = false;
         }
@@ -88,6 +92,8 @@ public class HudTestActivity extends Activity {
 
     @Override
     public void onResume() {
+        super.onResume();
+        Log.i(TAG, "Resuming");
         mBlinker = new Blinker();
 
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -104,16 +110,19 @@ public class HudTestActivity extends Activity {
 
     @Override
     public void onPause() {
+        super.onPause();
         mBlinker.stop();
     }
 
     @Override
     public void onStart() {
+        super.onStart();
         bindService();
     }
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
         unbindService();
     }
 }

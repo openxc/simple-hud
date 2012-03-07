@@ -25,6 +25,7 @@
         <dependency>
             <groupId>com.openxc.hardware</groupId>
             <artifactId>hud</artifactId>
+            <type>apklib</type>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
