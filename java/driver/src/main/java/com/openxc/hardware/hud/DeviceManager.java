@@ -24,7 +24,8 @@ import android.util.Log;
 
 public class DeviceManager {
     private final static String TAG = "DeviceManager";
-    private final static UUID RFCOMM_UUID = new UUID(0x00, 0x03);
+    private final static UUID RFCOMM_UUID = UUID.fromString(
+            "00001101-0000-1000-8000-00805f9b34fb");
 
     private Context mContext;
     private BluetoothAdapter mBluetoothAdapter;
