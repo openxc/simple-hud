@@ -2,6 +2,8 @@ package com.openxc.hardware.hud;
 
 import java.io.IOException;
 
+import java.lang.reflect.Method;
+
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -19,6 +21,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.Intent;
+
+import android.os.ParcelUuid;
 
 import android.util.Log;
 
@@ -85,6 +89,27 @@ public class DeviceManager {
         if(mTargetDevice == null) {
             Log.w(TAG, "Can't setup socket -- device is " + mTargetDevice);
             throw new BluetoothException();
+        }
+
+        ParcelUuid[] retval = null;
+        try {
+            Class cl = Class.forName("android.bluetooth.BluetoothDevice");
+            Class[] par = {};
+            Method method = cl.getMethod("fetchUuidsWithSdp", par);
+            Object[] args = {};
+            method.invoke(mTargetDevice, args);
+
+            cl = Class.forName("android.bluetooth.BluetoothDevice");
+            Class[] par2 = {};
+            method = cl.getMethod("getUuids", par2);
+            retval = (ParcelUuid[])method.invoke(mTargetDevice, args);
+        } catch(Exception e) {
+            Log.w(TAG, "ERROR", e);
+        }
+
+        Log.d(TAG, "found some " + retval.length + " uuids");
+        for(ParcelUuid uuid : retval) {
+            Log.d(TAG, "Available service UUID: " + uuid);
         }
 
         Log.d(TAG, "Scanning services on " + mTargetDevice);
