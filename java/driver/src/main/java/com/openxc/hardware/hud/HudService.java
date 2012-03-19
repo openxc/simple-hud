@@ -140,8 +140,8 @@ public class HudService extends Service implements BluetoothHudInterface {
         }
         mDeviceManager.connect(targetAddress);
 
-        // mConnectionKeepalive = new ConnectionKeepalive();
-        // new Thread(mConnectionKeepalive).start();
+        mConnectionKeepalive = new ConnectionKeepalive();
+        new Thread(mConnectionKeepalive).start();
     }
 
     private void connectSocket() throws BluetoothException {
@@ -150,6 +150,7 @@ public class HudService extends Service implements BluetoothHudInterface {
             mOutStream = new PrintWriter(new OutputStreamWriter(mSocket.getOutputStream()));
             mInStream = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
             connected = true;
+            Log.i(TAG, "Socket stream to HUD opened successfully");
         } catch (IOException e) {
             // We are expecting to see "host is down" when repeatedly
             // autoconnecting
