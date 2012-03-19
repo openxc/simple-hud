@@ -49,7 +49,8 @@ public class DeviceManager {
 
     public void discoverDevices(final String targetAddress) {
         Log.d(TAG, "Starting device discovery");
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+        Set<BluetoothDevice> pairedDevices =
+            mBluetoothAdapter.getBondedDevices();
         for(BluetoothDevice device : pairedDevices) {
             Log.d(TAG, "Found already paired device: " + device);
             if(deviceDiscovered(device, targetAddress)) {
@@ -87,9 +88,9 @@ public class DeviceManager {
 
         Log.d(TAG, "Scanning services on " + mTargetDevice);
         try {
-            mSocket = mTargetDevice.createRfcommSocketToServiceRecord(RFCOMM_UUID);
+            mSocket = mTargetDevice.createRfcommSocketToServiceRecord(
+                    RFCOMM_UUID);
         } catch(IOException e) {}
-
 
         try {
             mSocket.connect();
