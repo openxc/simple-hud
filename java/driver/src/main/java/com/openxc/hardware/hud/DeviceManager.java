@@ -118,7 +118,7 @@ public class DeviceManager {
     private void captureDevice(BluetoothDevice device) {
         mDeviceLock.lock();
         mTargetDevice = device;
-        mTargetDevice.notifyAll();
+        mDeviceChangedCondition.signal();
         mDeviceLock.unlock();
 
         mContext.unregisterReceiver(mReceiver);
