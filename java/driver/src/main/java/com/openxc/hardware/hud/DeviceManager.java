@@ -121,8 +121,10 @@ public class DeviceManager {
         mDeviceChangedCondition.signal();
         mDeviceLock.unlock();
 
-        mContext.unregisterReceiver(mReceiver);
-        mBluetoothAdapter.cancelDiscovery();
+        if(mReceiver != null) {
+            mContext.unregisterReceiver(mReceiver);
+            mBluetoothAdapter.cancelDiscovery();
+        }
     }
 
     private boolean deviceDiscovered(BluetoothDevice device,
