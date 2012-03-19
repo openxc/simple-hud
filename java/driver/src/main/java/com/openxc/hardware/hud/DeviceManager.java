@@ -130,7 +130,7 @@ public class DeviceManager {
     private boolean deviceDiscovered(BluetoothDevice device,
             String targetAddress) {
         Log.d(TAG, "Found Bluetooth device: " + device);
-        if(device.getAddress() == targetAddress) {
+        if(device.getAddress().equals(targetAddress)) {
             Log.d(TAG, "Found matching device: " + device);
             return true;
         }
