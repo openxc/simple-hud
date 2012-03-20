@@ -68,7 +68,7 @@ public class HudService extends Service implements BluetoothHudInterface {
                     continue;
                 }
 
-                while(isConnected()){
+                while(ping()){
                     try {
                         Thread.sleep(POLL_DELAY);
                     } catch(InterruptedException e) {
@@ -212,11 +212,17 @@ public class HudService extends Service implements BluetoothHudInterface {
             return false;
         }
 
-        mOutStream.write("P");
+        mOutStream.write("PM");
         inFlush(mInStream);
         mOutStream.flush();
         String response = getResponse(mInStream);
-        if(response == null || !response.equals("OK")) {
+        if(response == null || !response.equals("ACK")) {
+            Log.d(TAG, "Received unexpected ping response: " + response);
+            try {
+                disconnect();
+            } catch(BluetoothException e) {
+                Log.w(TAG, "Unable to disconnect after failed ping", e);
+            }
             return false;
         }
         Log.d(TAG, "Ping? Pong!");
