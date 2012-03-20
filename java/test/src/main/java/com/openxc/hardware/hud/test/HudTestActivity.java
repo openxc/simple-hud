@@ -31,8 +31,8 @@ public class HudTestActivity extends Activity {
             mRunning = false;
             if(mService != null) {
                 try {
-                mService.setAll(0.0);
-                mService.disconnect();
+                    mService.setAll(0.0);
+                    mService.disconnect();
                 } catch(BluetoothException e) {
                     Log.d(TAG, "An error ocurred while shutting down", e);
                 }
@@ -42,9 +42,9 @@ public class HudTestActivity extends Activity {
 		@Override
 		public void run() {
 			while(mRunning){
-				for (int i=0;i<5;i++){
+				for(int i=0;i<5;i++){
                     int channel;
-					if (i == 0) {
+					if(i == 0) {
                         channel = 4;
                     } else {
                         channel = i - 1;
@@ -58,8 +58,10 @@ public class HudTestActivity extends Activity {
                     }
 
 					try {
-						Thread.sleep(PERIOD+Math.round(PERIOD/10));
-					} catch (InterruptedException e) {return;}
+						Thread.sleep(PERIOD + Math.round(PERIOD/10));
+					} catch(InterruptedException e) {
+                        return;
+                    }
 				}
                 try {
                     Log.d(TAG, "Raw battery level: " + mService.rawBatteryLevel());
@@ -68,7 +70,7 @@ public class HudTestActivity extends Activity {
 		}
 	};
 
-    private ServiceConnection mConnection = new ServiceConnection () {
+    private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName classNAme, IBinder service) {
             mService = ((HudService.LocalBinder)service).getService();
             new Thread(new Runnable() {
