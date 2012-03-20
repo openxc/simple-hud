@@ -64,22 +64,24 @@ public class HudTestActivity extends Activity {
                     }
 				}
                 try {
-                    Log.d(TAG, "Raw battery level: " + mService.rawBatteryLevel());
+                    Log.d(TAG, "Raw battery level: " +
+                            mService.rawBatteryLevel());
                 } catch(BluetoothException e) { }
 			}
 		}
 	};
 
     private ServiceConnection mConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName classNAme, IBinder service) {
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
             mService = ((HudService.LocalBinder)service).getService();
             new Thread(new Runnable() {
                 public void run() {
                     try {
                         mService.connect(HUD_MAC_ADDRESS);
                     } catch(BluetoothException e) {
-                        Log.w(TAG, "Unable to connect to Bluetooth device with " +
-                                "address: " + HUD_MAC_ADDRESS);
+                        Log.w(TAG, "Unable to connect to Bluetooth device " +
+                            "with address: " + HUD_MAC_ADDRESS);
                     }
                     new Thread(mBlinker).start();
                 }
@@ -113,14 +115,15 @@ public class HudTestActivity extends Activity {
         Log.i(TAG, "Resuming");
         mBlinker = new Blinker();
 
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(bluetoothAdapter == null) {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if(adapter == null) {
             Log.w(TAG, "Unable to open Bluetooth adapter");
         } else {
-            if(!bluetoothAdapter.isEnabled()) {
+            if(!adapter.isEnabled()) {
                 Intent enableBluetoothIntent = new Intent(
                         BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BT);
+                startActivityForResult(enableBluetoothIntent,
+                        REQUEST_ENABLE_BT);
             }
         }
     }
