@@ -167,3 +167,7 @@ With the small solar panel installed on the LED VU board, we measured between
 closer to the 500mA maximum charge rate. If all of the LEDs are fully lit all
 the time, the LED board needs to be under direct sunlight in order to actually
 charge the battery.
+
+## License
+
+This source code is available under the BSD open source license.
