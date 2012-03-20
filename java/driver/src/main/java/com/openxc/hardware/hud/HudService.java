@@ -22,7 +22,6 @@ public class HudService extends Service implements BluetoothHudInterface {
     private final long RETRY_DELAY = 1000;
     private final long POLL_DELAY = 3000;
 
-    private boolean connected;
     private DeviceManager mDeviceManager;
     private PrintWriter mOutStream;
     private BufferedReader mInStream;
@@ -42,7 +41,7 @@ public class HudService extends Service implements BluetoothHudInterface {
         } catch(BluetoothException e) {
             Log.w(TAG, "Unable to open Bluetooth device manager", e);
         }
-        connected = false;
+        mSocket = null;
     }
 
     @Override
@@ -56,7 +55,11 @@ public class HudService extends Service implements BluetoothHudInterface {
     @Override
     public void onDestroy() {
         Log.d(TAG, "Being destroyed");
-        disconnect();
+        try {
+            disconnect();
+        } catch(BluetoothException e) {
+            Log.d(TAG, "Unable to disconnect when being destroyed", e);
+        }
     }
 
     @Override
@@ -66,63 +69,76 @@ public class HudService extends Service implements BluetoothHudInterface {
     }
 
     @Override
-    public void disconnect() {
-        if(connected) {
-            Log.d(TAG, "Disconnecting from the socket " + mSocket);
-            connected = false;
-            mOutStream.close();
-            try {
-                mInStream.close();
-            } catch(IOException e) { }
-
-            try {
-                mSocket.close();
-            } catch(IOException e) { }
+    public void disconnect() throws BluetoothException {
+        if(!isConnected()) {
+            Log.w(TAG, "Unable to disconnect -- not connected");
+            throw new BluetoothException();
         }
+
+        Log.d(TAG, "Disconnecting from the socket " + mSocket);
+        mOutStream.close();
+        try {
+            mInStream.close();
+        } catch(IOException e) {
+            Log.w(TAG, "Unable to close the input stream", e);
+        }
+
+        try {
+            mSocket.close();
+        } catch(IOException e) {
+            Log.w(TAG, "Unable to close the socket", e);
+        }
+        mSocket = null;
+        Log.d(TAG, "Disconnected from the socket");
     }
 
     @Override
-    public boolean set(int chan, double value) {
-        //Abort quietly if not connected
-        if (!connected)
-            return false;
+    public void set(int chan, double value) throws BluetoothException {
+        if(!isConnected()) {
+            Log.w(TAG, "Unable to set -- not connected");
+            throw new BluetoothException();
+        }
+
         mOutStream.write("S"+chan+Math.round(value*255)+"M");
         //inFlush(in);      //Flush so we know the next line is new
         mOutStream.flush();
         //return verifyResponse(in);    //essentially, just look for "OK"
-        return true;
     }
 
     @Override
-    public boolean setAll(double value) {
-        //Abort quietly if not connected
-        if (!connected)
-            return false;
+    public void setAll(double value) throws BluetoothException {
+        if(!isConnected()) {
+            Log.w(TAG, "Unable to setAll -- not connected");
+            throw new BluetoothException();
+        }
+
         boolean success = true;
-        for (int i=0;i<5;i++)
-            if (!set(i,value))
-                success = false;
-        return success;
+        for(int i=0;i<5;i++) {
+            set(i,value);
+        }
     }
 
     @Override
-    public boolean fade(int chan, long duration, double value) {
-        //Abort quietly if not connected
-        if (!connected)
-            return false;
+    public void fade(int chan, long duration, double value)
+            throws BluetoothException {
+        if(!isConnected()) {
+            Log.w(TAG, "Unable to fade -- not connected");
+            throw new BluetoothException();
+        }
+
         mOutStream.write("F"+chan+duration+","+ Math.round(value*255)+"M");
         //inFlush(in);      //Flush so we know the next line is new
         mOutStream.flush();
         //return verifyResponse(in);    //essentially, just look for "OK"
-        return true;
     }
 
     @Override
     public int rawBatteryLevel() throws BluetoothException {
-        if (!connected) {
-            Log.w(TAG, "Must be connected to check battery level");
+        if(!isConnected()) {
+            Log.w(TAG, "Unable to check battery level -- not connected");
             throw new BluetoothException();
         }
+
         mOutStream.write("BM");
         inFlush(mInStream);     //Flush so we know the next line is new
         mOutStream.flush();
@@ -147,9 +163,10 @@ public class HudService extends Service implements BluetoothHudInterface {
     private void connectSocket() throws BluetoothException {
         try {
             mSocket = mDeviceManager.setupSocket();
-            mOutStream = new PrintWriter(new OutputStreamWriter(mSocket.getOutputStream()));
-            mInStream = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
-            connected = true;
+            mOutStream = new PrintWriter(new OutputStreamWriter(
+                        mSocket.getOutputStream()));
+            mInStream = new BufferedReader(new InputStreamReader(
+                        mSocket.getInputStream()));
             Log.i(TAG, "Socket stream to HUD opened successfully");
         } catch (IOException e) {
             // We are expecting to see "host is down" when repeatedly
@@ -159,15 +176,17 @@ public class HudService extends Service implements BluetoothHudInterface {
             } else {
                 Log.e(TAG, "Error opening streams "+e);
             }
-            connected = false;
+            mSocket = null;
             throw new BluetoothException();
         }
     }
 
+    private boolean isConnected() {
+        return mSocket != null;
+    }
+
     @Override
-    public boolean online() {
-        // TODO
-        return mSocket != null; // && mSocket.isConnected();
+    public void ping() {
     }
 
     private ConnectionKeepalive mConnectionKeepalive;
@@ -196,11 +215,12 @@ public class HudService extends Service implements BluetoothHudInterface {
                     continue;
                 }
 
-                // ping device while we are connected
-                while(online()){
+                while(isConnected()){
                     try {
                         Thread.sleep(POLL_DELAY);
-                    } catch (InterruptedException e) {return;}
+                    } catch (InterruptedException e) {
+                        return;
+                    }
                 }
 
                 Log.i(TAG, "Socket " + mSocket + " has been disconnected!");

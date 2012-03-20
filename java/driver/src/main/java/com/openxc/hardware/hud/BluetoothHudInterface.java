@@ -8,7 +8,7 @@ public interface BluetoothHudInterface {
      * @return
      *  Returns true if the device responds to an RSSI request.
      */
-    public boolean online();
+    public void ping() throws BluetoothException;
 
     /**
      * Immediately set an LED channel to a given intensity
@@ -17,11 +17,9 @@ public interface BluetoothHudInterface {
      *  The LED channel to set (currently 0-4 are supported)
      * @param value
      *  The intensity to set, given as a double between 0.0 and 1.0
-     * @return
-     *  Returns true if device was connected
      *  No guarantee of reception.
      */
-    public boolean set(int chan, double value);
+    public void set(int chan, double value) throws BluetoothException;
 
     /**
      * Immediately set all LED channels to a given intensity
@@ -32,7 +30,7 @@ public interface BluetoothHudInterface {
      *  Returns true if device was connected
      *  No guarantee of reception.
      */
-    public boolean setAll(double value);
+    public void setAll(double value) throws BluetoothException;
 
     /**
      * Will read the current battery level of the device
@@ -59,13 +57,14 @@ public interface BluetoothHudInterface {
      *  Returns true if device was connected
      *  No guarantee of reception.
      */
-    public boolean fade(int chan, long duration, double value);
+    public void fade(int chan, long duration, double value)
+            throws BluetoothException;
 
     /**
      * Disconnect the bluetooth device.
      * In order to re-establish a connection, connect() must be called.
      */
-    public void disconnect();
+    public void disconnect() throws BluetoothException;
 
     public void connect(String targetAddress) throws BluetoothException;
 }
