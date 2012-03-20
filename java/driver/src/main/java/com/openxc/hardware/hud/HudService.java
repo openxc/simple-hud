@@ -34,6 +34,46 @@ public class HudService extends Service implements BluetoothHudInterface {
         }
     }
 
+    private ConnectionKeepalive mConnectionKeepalive;
+    private class ConnectionKeepalive implements Runnable {
+        private boolean mRunning;
+
+        public ConnectionKeepalive() {
+            mRunning = true;
+        }
+
+        public void stop() {
+            mRunning = false;
+        }
+
+        public void run() {
+            while(mRunning) {
+                try {
+                    connectSocket();
+                } catch(BluetoothException e) {
+                    Log.w(TAG, "Unable to connect to socket", e);
+                    try {
+                        Thread.sleep(RETRY_DELAY);
+                    } catch(InterruptedException e2) {
+                        return;
+                    }
+                    continue;
+                }
+
+                while(isConnected()){
+                    try {
+                        Thread.sleep(POLL_DELAY);
+                    } catch(InterruptedException e) {
+                        return;
+                    }
+                }
+
+                Log.i(TAG, "Socket " + mSocket + " has been disconnected!");
+            }
+        }
+    }
+
+
     @Override
     public void onCreate() {
         try {
@@ -112,7 +152,6 @@ public class HudService extends Service implements BluetoothHudInterface {
             throw new BluetoothException();
         }
 
-        boolean success = true;
         for(int i=0;i<5;i++) {
             set(i,value);
         }
@@ -160,72 +199,8 @@ public class HudService extends Service implements BluetoothHudInterface {
         new Thread(mConnectionKeepalive).start();
     }
 
-    private void connectSocket() throws BluetoothException {
-        try {
-            mSocket = mDeviceManager.setupSocket();
-            mOutStream = new PrintWriter(new OutputStreamWriter(
-                        mSocket.getOutputStream()));
-            mInStream = new BufferedReader(new InputStreamReader(
-                        mSocket.getInputStream()));
-            Log.i(TAG, "Socket stream to HUD opened successfully");
-        } catch(IOException e) {
-            // We are expecting to see "host is down" when repeatedly
-            // autoconnecting
-            if(!(e.toString().contains("Host is Down"))){
-                Log.d(TAG, "Error opening streams "+e);
-            } else {
-                Log.e(TAG, "Error opening streams "+e);
-            }
-            mSocket = null;
-            throw new BluetoothException();
-        }
-    }
-
-    private boolean isConnected() {
-        return mSocket != null;
-    }
-
     @Override
     public void ping() {
-    }
-
-    private ConnectionKeepalive mConnectionKeepalive;
-    private class ConnectionKeepalive implements Runnable {
-        private boolean mRunning;
-
-        public ConnectionKeepalive() {
-            mRunning = true;
-        }
-
-        public void stop() {
-            mRunning = false;
-        }
-
-        public void run() {
-            while(mRunning) {
-                try {
-                    connectSocket();
-                } catch(BluetoothException e) {
-                    Log.w(TAG, "Unable to connect to socket", e);
-                    try {
-                        Thread.sleep(RETRY_DELAY);
-                    } catch(InterruptedException e2) {
-                        return;
-                    }
-                    continue;
-                }
-
-                while(isConnected()){
-                    try {
-                        Thread.sleep(POLL_DELAY);
-                    } catch(InterruptedException e) {
-                        return;
-                    }
-                }
-
-                Log.i(TAG, "Socket " + mSocket + " has been disconnected!");
-            }
-        }
     }
 
     /**
@@ -256,5 +231,30 @@ public class HudService extends Service implements BluetoothHudInterface {
             return null;
         }
         return line;
+    }
+
+    private void connectSocket() throws BluetoothException {
+        try {
+            mSocket = mDeviceManager.setupSocket();
+            mOutStream = new PrintWriter(new OutputStreamWriter(
+                        mSocket.getOutputStream()));
+            mInStream = new BufferedReader(new InputStreamReader(
+                        mSocket.getInputStream()));
+            Log.i(TAG, "Socket stream to HUD opened successfully");
+        } catch(IOException e) {
+            // We are expecting to see "host is down" when repeatedly
+            // autoconnecting
+            if(!(e.toString().contains("Host is Down"))){
+                Log.d(TAG, "Error opening streams "+e);
+            } else {
+                Log.e(TAG, "Error opening streams "+e);
+            }
+            mSocket = null;
+            throw new BluetoothException();
+        }
+    }
+
+    private boolean isConnected() {
+        return mSocket != null;
     }
 }
