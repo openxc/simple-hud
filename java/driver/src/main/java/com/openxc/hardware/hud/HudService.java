@@ -60,7 +60,7 @@ public class HudService extends Service implements BluetoothHudInterface {
                     continue;
                 }
 
-                while(ping()){
+                while(isConnected()){
                     try {
                         Thread.sleep(POLL_DELAY);
                     } catch(InterruptedException e) {
