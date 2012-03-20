@@ -8,7 +8,7 @@ public interface BluetoothHudInterface {
      * @return
      *  Returns true if the device responds to an RSSI request.
      */
-    public void ping() throws BluetoothException;
+    public boolean ping();
 
     /**
      * Immediately set an LED channel to a given intensity

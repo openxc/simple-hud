@@ -60,7 +60,7 @@ public class HudService extends Service implements BluetoothHudInterface {
                     continue;
                 }
 
-                while(isConnected()){
+                while(ping()){
                     try {
                         Thread.sleep(POLL_DELAY);
                     } catch(InterruptedException e) {
@@ -198,7 +198,21 @@ public class HudService extends Service implements BluetoothHudInterface {
     }
 
     @Override
-    public void ping() {
+    public boolean ping() {
+        if(!isConnected()) {
+            Log.w(TAG, "Unable to ping -- not connected");
+            return false;
+        }
+
+        mOutStream.write("P");
+        inFlush(mInStream);
+        mOutStream.flush();
+        String response = getResponse(mInStream);
+        if(response == null || !response.equals("OK")) {
+            return false;
+        }
+        Log.d(TAG, "Ping? Pong!");
+        return true;
     }
 
     /**
