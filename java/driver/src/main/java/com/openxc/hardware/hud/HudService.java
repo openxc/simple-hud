@@ -139,10 +139,8 @@ public class HudService extends Service implements BluetoothHudInterface {
             throw new BluetoothException();
         }
 
-        mOutStream.write("S"+chan+Math.round(value*255)+"M");
-        //inFlush(in);      //Flush so we know the next line is new
+        mOutStream.write("S" + chan + Math.round(value * 255) + "M");
         mOutStream.flush();
-        //return verifyResponse(in);    //essentially, just look for "OK"
     }
 
     @Override
@@ -152,8 +150,8 @@ public class HudService extends Service implements BluetoothHudInterface {
             throw new BluetoothException();
         }
 
-        for(int i=0;i<5;i++) {
-            set(i,value);
+        for(int i = 0; i < 5; i++) {
+            set(i, value);
         }
     }
 
@@ -165,10 +163,9 @@ public class HudService extends Service implements BluetoothHudInterface {
             throw new BluetoothException();
         }
 
-        mOutStream.write("F"+chan+duration+","+ Math.round(value*255)+"M");
-        //inFlush(in);      //Flush so we know the next line is new
+        mOutStream.write("F" + chan + duration + "," +
+                Math.round(value * 255) + "M");
         mOutStream.flush();
-        //return verifyResponse(in);    //essentially, just look for "OK"
     }
 
     @Override
@@ -179,13 +176,14 @@ public class HudService extends Service implements BluetoothHudInterface {
         }
 
         mOutStream.write("BM");
-        inFlush(mInStream);     //Flush so we know the next line is new
+        inFlush(mInStream);
         mOutStream.flush();
-        String line = getResponse(mInStream);
-        if((line != null)&&(line.indexOf("VAL:") >= 0)){
-            return Integer.parseInt(line.substring(4));
+        String response = getResponse(mInStream);
+        if(response != null && response.indexOf("VAL:") >= 0) {
+            return Integer.parseInt(response.substring(4));
+        } else {
+            throw new BluetoothException("Invalid battery level: " + response);
         }
-        return -1;
     }
 
     @Override
