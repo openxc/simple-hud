@@ -134,6 +134,7 @@ public class DeviceManager {
             Log.d(TAG, "Found already paired device: " + device);
             if(deviceDiscovered(device, targetAddress)) {
                 captureDevice(device);
+                return;
             }
         }
 
