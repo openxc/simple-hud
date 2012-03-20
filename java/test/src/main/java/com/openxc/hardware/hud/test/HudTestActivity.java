@@ -30,8 +30,12 @@ public class HudTestActivity extends Activity {
 		public void stop() {
             mRunning = false;
             if(mService != null) {
+                try {
                 mService.setAll(0.0);
                 mService.disconnect();
+                } catch(BluetoothException e) {
+                    Log.d(TAG, "An error ocurred while shutting down", e);
+                }
             }
 		}
 
@@ -39,13 +43,20 @@ public class HudTestActivity extends Activity {
 		public void run() {
 			while(mRunning){
 				for (int i=0;i<5;i++){
+                    int channel;
 					if (i == 0) {
-						mService.fade(4, PERIOD, 0.0);
+                        channel = 4;
                     } else {
-						mService.fade(i-1, PERIOD, 0.0);
+                        channel = i - 1;
                     }
 
-					mService.fade(i, PERIOD, 1.0);
+                    try {
+                        mService.fade(channel, PERIOD, 0.0);
+                        mService.fade(i, PERIOD, 1.0);
+                    } catch(BluetoothException e) {
+                        Log.w(TAG, "Unable to blink", e);
+                    }
+
 					try {
 						Thread.sleep(PERIOD+Math.round(PERIOD/10));
 					} catch (InterruptedException e) {return;}

@@ -44,10 +44,6 @@ public class DeviceManager {
         }
     }
 
-    public boolean connected() {
-        return mTargetDevice != null;
-    }
-
     public void discoverDevices(final String targetAddress) {
         Log.d(TAG, "Starting device discovery");
         Set<BluetoothDevice> pairedDevices =
