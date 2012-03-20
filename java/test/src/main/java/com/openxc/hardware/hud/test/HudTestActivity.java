@@ -69,15 +69,16 @@ public class HudTestActivity extends Activity {
                         return;
                     }
 				}
+
                 try {
                     Log.d(TAG, "Raw battery level: " +
                             mService.rawBatteryLevel());
                 } catch(BluetoothException e) {
-                    try {
-                        Thread.sleep(ERROR_PERIOD);
-                    } catch(InterruptedException e2) {
-                        return;
-                    }
+                    Log.w(TAG, "Unable to get raw battery level", e);
+                    // TODO we should sleep if we're still getting errors, but
+                    // because the buffer on the Bluetooth device isn't getting
+                    // flushed properly, sometimes the battery level gets a mix
+                    // of errors and responses to ping.
                 }
 			}
 		}

@@ -141,7 +141,7 @@ public class HudService extends Service implements BluetoothHudInterface {
     }
 
     @Override
-    public void set(int chan, double value) throws BluetoothException {
+    public synchronized void set(int chan, double value) throws BluetoothException {
         if(!isConnected()) {
             Log.w(TAG, "Unable to set -- not connected");
             throw new BluetoothException();
@@ -152,7 +152,7 @@ public class HudService extends Service implements BluetoothHudInterface {
     }
 
     @Override
-    public void setAll(double value) throws BluetoothException {
+    public synchronized void setAll(double value) throws BluetoothException {
         if(!isConnected()) {
             Log.w(TAG, "Unable to setAll -- not connected");
             throw new BluetoothException();
@@ -164,7 +164,7 @@ public class HudService extends Service implements BluetoothHudInterface {
     }
 
     @Override
-    public void fade(int chan, long duration, double value)
+    public synchronized void fade(int chan, long duration, double value)
             throws BluetoothException {
         if(!isConnected()) {
             Log.w(TAG, "Unable to fade -- not connected");
@@ -177,14 +177,13 @@ public class HudService extends Service implements BluetoothHudInterface {
     }
 
     @Override
-    public int rawBatteryLevel() throws BluetoothException {
+    public synchronized int rawBatteryLevel() throws BluetoothException {
         if(!isConnected()) {
             Log.w(TAG, "Unable to check battery level -- not connected");
             throw new BluetoothException();
         }
 
         mOutStream.write("BM");
-        inFlush(mInStream);
         mOutStream.flush();
         String response = getResponse(mInStream);
         if(response != null && response.indexOf("VAL:") >= 0) {
@@ -206,18 +205,17 @@ public class HudService extends Service implements BluetoothHudInterface {
     }
 
     @Override
-    public boolean ping() {
+    public synchronized boolean ping() {
         if(!isConnected()) {
             Log.w(TAG, "Unable to ping -- not connected");
             return false;
         }
 
         mOutStream.write("PM");
-        inFlush(mInStream);
         mOutStream.flush();
         String response = getResponse(mInStream);
-        if(response == null || !response.equals("ACK")) {
-            Log.d(TAG, "Received unexpected ping response: " + response);
+        if(response == null) {
+            Log.w(TAG, "Received unexpected ping response: " + response);
             try {
                 disconnect();
             } catch(BluetoothException e) {
@@ -227,21 +225,6 @@ public class HudService extends Service implements BluetoothHudInterface {
         }
         Log.d(TAG, "Ping? Pong!");
         return true;
-    }
-
-    /**
-     * Clear any waiting characters from the input buffer.
-     *
-     * Disregard exceptions, this is only an attempt to clear the buffer
-     */
-    private void inFlush(BufferedReader reader){
-        try {
-            while(reader.ready()) {
-                //A guess at something larger than the buffer size of the BT
-                //adapter
-                reader.skip(1024);
-            }
-        } catch(IOException e) {}
     }
 
     private String getResponse(BufferedReader reader){
