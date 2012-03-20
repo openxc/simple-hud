@@ -17,6 +17,7 @@ import android.app.Activity;
 public class HudTestActivity extends Activity {
     private final static String TAG = "HudTest";
 	private final long PERIOD = 500;
+	private final long ERROR_PERIOD = 2000;
     private final String HUD_MAC_ADDRESS = "00:06:66:43:0D:08";
     private final static int REQUEST_ENABLE_BT = 42;
 
@@ -55,6 +56,11 @@ public class HudTestActivity extends Activity {
                         mService.fade(i, PERIOD, 1.0);
                     } catch(BluetoothException e) {
                         Log.w(TAG, "Unable to blink", e);
+                        try {
+                            Thread.sleep(ERROR_PERIOD);
+                        } catch(InterruptedException er2) {
+                            return;
+                        }
                     }
 
 					try {
@@ -66,7 +72,13 @@ public class HudTestActivity extends Activity {
                 try {
                     Log.d(TAG, "Raw battery level: " +
                             mService.rawBatteryLevel());
-                } catch(BluetoothException e) { }
+                } catch(BluetoothException e) {
+                    try {
+                        Thread.sleep(ERROR_PERIOD);
+                    } catch(InterruptedException e2) {
+                        return;
+                    }
+                }
 			}
 		}
 	};
