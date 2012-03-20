@@ -42,7 +42,7 @@ public class HudTestActivity extends Activity {
 
 		@Override
 		public void run() {
-			while(mRunning){
+			while(mRunning) {
 				for(int i=0;i<5;i++){
                     int channel;
 					if(i == 0) {
@@ -59,6 +59,10 @@ public class HudTestActivity extends Activity {
                         try {
                             Thread.sleep(ERROR_PERIOD);
                         } catch(InterruptedException er2) {
+                            return;
+                        }
+
+                        if(!mRunning) {
                             return;
                         }
                     }

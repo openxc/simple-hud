@@ -68,7 +68,7 @@ public class HudService extends Service implements BluetoothHudInterface {
                     continue;
                 }
 
-                while(ping()){
+                while(ping() && mRunning){
                     try {
                         Thread.sleep(POLL_DELAY);
                     } catch(InterruptedException e) {
@@ -123,6 +123,8 @@ public class HudService extends Service implements BluetoothHudInterface {
             throw new BluetoothException();
         }
 
+        mConnectionKeepalive.stop();
+
         Log.d(TAG, "Disconnecting from the socket " + mSocket);
         mOutStream.close();
         try {
@@ -131,10 +133,12 @@ public class HudService extends Service implements BluetoothHudInterface {
             Log.w(TAG, "Unable to close the input stream", e);
         }
 
-        try {
-            mSocket.close();
-        } catch(IOException e) {
-            Log.w(TAG, "Unable to close the socket", e);
+        if(mSocket != null) {
+            try {
+                mSocket.close();
+            } catch(IOException e) {
+                Log.w(TAG, "Unable to close the socket", e);
+            }
         }
         mSocket = null;
         Log.d(TAG, "Disconnected from the socket");
