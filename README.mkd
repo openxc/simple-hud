@@ -10,6 +10,15 @@ the bottom of the unit. It can be plugged into any computer USB port or AC USB
 power adapter. The unit will consume up to ~500mA of current to charge it's
 internal battery.
 
+## Contributors
+
+The HUD was originally dreamed up at Ford for use with the [OpenXC][openxc]
+project and it was prototyped by the folks at [Bug Labs][buglabs]. The original
+software for OSGi was ported to Android by Chris Peplin at Ford.
+
+[openxc]: http://openxcplatform.com
+[buglabs]: http://www.buglabs.net/
+
 ## Android
 
 The HUD is exposed in Android via an in-process service. Take a look at the
