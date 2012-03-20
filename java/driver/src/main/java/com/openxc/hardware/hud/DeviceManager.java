@@ -22,6 +22,10 @@ import android.content.Intent;
 
 import android.util.Log;
 
+/**
+ * The DeviceManager collects the functions required to discover and open a
+ * socket to the Bluetooth device.
+ */
 public class DeviceManager {
     private final static String TAG = "DeviceManager";
     private final static UUID RFCOMM_UUID = UUID.fromString(
@@ -36,6 +40,10 @@ public class DeviceManager {
             mDeviceLock.newCondition();
     private BroadcastReceiver mReceiver;
 
+    /**
+     * The DeviceManager requires an Android Context in order to send the intent
+     * to enable Bluetooth if it isn't already on.
+     */
     public DeviceManager(Context context) throws BluetoothException {
         mContext = context;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -44,39 +52,12 @@ public class DeviceManager {
         }
     }
 
-    public void discoverDevices(final String targetAddress) {
-        Log.d(TAG, "Starting device discovery");
-        Set<BluetoothDevice> pairedDevices =
-            mBluetoothAdapter.getBondedDevices();
-        for(BluetoothDevice device : pairedDevices) {
-            Log.d(TAG, "Found already paired device: " + device);
-            if(deviceDiscovered(device, targetAddress)) {
-                captureDevice(device);
-            }
-        }
-
-        mReceiver = new BroadcastReceiver() {
-            public void onReceive(Context context, Intent intent) {
-                if(BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
-                    BluetoothDevice device = intent.getParcelableExtra(
-                            BluetoothDevice.EXTRA_DEVICE);
-                    if (device.getBondState() != BluetoothDevice.BOND_BONDED
-                            && deviceDiscovered(device, targetAddress)) {
-                        captureDevice(device);
-                    }
-                }
-            }
-        };
-
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        mContext.registerReceiver(mReceiver, filter);
-
-        if(mBluetoothAdapter.isDiscovering()) {
-            mBluetoothAdapter.cancelDiscovery();
-        }
-        mBluetoothAdapter.startDiscovery();
-    }
-
+    /**
+     * Open an RFCOMM socket to the connected Bluetooth device.
+     *
+     * The DeviceManager must already have a device connected, so
+     * discoverDevices needs to be called.
+     */
     public BluetoothSocket setupSocket() throws BluetoothException {
         if(mTargetDevice == null) {
             Log.w(TAG, "Can't setup socket -- device is " + mTargetDevice);
@@ -101,6 +82,12 @@ public class DeviceManager {
         }
     }
 
+    /**
+     * Discover and connect to the target device.
+     *
+     * This method is asynchronous - after a device is connected, the user
+     * should call setupSocket() to get a socket connection.
+     */
     public void connect(String targetAddress) {
         discoverDevices(targetAddress);
         mDeviceLock.lock();
@@ -132,5 +119,43 @@ public class DeviceManager {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Check the list of previously paired devices and any discoverable devices
+     * for one matching the target address. Once a matching device is found,
+     * calls captureDevice to connect with it.
+     */
+    private void discoverDevices(final String targetAddress) {
+        Log.d(TAG, "Starting device discovery");
+        Set<BluetoothDevice> pairedDevices =
+            mBluetoothAdapter.getBondedDevices();
+        for(BluetoothDevice device : pairedDevices) {
+            Log.d(TAG, "Found already paired device: " + device);
+            if(deviceDiscovered(device, targetAddress)) {
+                captureDevice(device);
+            }
+        }
+
+        mReceiver = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                if(BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
+                    BluetoothDevice device = intent.getParcelableExtra(
+                            BluetoothDevice.EXTRA_DEVICE);
+                    if (device.getBondState() != BluetoothDevice.BOND_BONDED
+                            && deviceDiscovered(device, targetAddress)) {
+                        captureDevice(device);
+                    }
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        mContext.registerReceiver(mReceiver, filter);
+
+        if(mBluetoothAdapter.isDiscovering()) {
+            mBluetoothAdapter.cancelDiscovery();
+        }
+        mBluetoothAdapter.startDiscovery();
     }
 }

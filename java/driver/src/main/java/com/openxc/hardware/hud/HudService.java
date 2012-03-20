@@ -17,6 +17,14 @@ import android.os.IBinder;
 
 import android.util.Log;
 
+/**
+ * The HudService manages the connection to the Bluetooth HUD.
+ *
+ * This is meant to be used as an in-process Android service, and all commands
+ * to the HUD go through this class. Users of the service should call connect()
+ * with the HUD's MAC address after the service connects. Once connected, any of
+ * the other methods can be used to control the LEDs.
+ */
 public class HudService extends Service implements BluetoothHudInterface {
     private final String TAG = "HudService";
     private final long RETRY_DELAY = 1000;
