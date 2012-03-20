@@ -143,7 +143,7 @@ public class HudService extends Service implements BluetoothHudInterface {
         inFlush(mInStream);     //Flush so we know the next line is new
         mOutStream.flush();
         String line = getResponse(mInStream);
-        if ((line != null)&&(line.indexOf("VAL:") >= 0)){
+        if((line != null)&&(line.indexOf("VAL:") >= 0)){
             return Integer.parseInt(line.substring(4));
         }
         return -1;
@@ -168,10 +168,10 @@ public class HudService extends Service implements BluetoothHudInterface {
             mInStream = new BufferedReader(new InputStreamReader(
                         mSocket.getInputStream()));
             Log.i(TAG, "Socket stream to HUD opened successfully");
-        } catch (IOException e) {
+        } catch(IOException e) {
             // We are expecting to see "host is down" when repeatedly
             // autoconnecting
-            if (!(e.toString().contains("Host is Down"))){
+            if(!(e.toString().contains("Host is Down"))){
                 Log.d(TAG, "Error opening streams "+e);
             } else {
                 Log.e(TAG, "Error opening streams "+e);
@@ -218,7 +218,7 @@ public class HudService extends Service implements BluetoothHudInterface {
                 while(isConnected()){
                     try {
                         Thread.sleep(POLL_DELAY);
-                    } catch (InterruptedException e) {
+                    } catch(InterruptedException e) {
                         return;
                     }
                 }
@@ -228,24 +228,30 @@ public class HudService extends Service implements BluetoothHudInterface {
         }
     }
 
-    //Clear any waiting characters from the input buffer.
+    /**
+     * Clear any waiting characters from the input buffer.
+     *
+     * Disregard exceptions, this is only an attempt to clear the buffer
+     */
     private void inFlush(BufferedReader reader){
         try {
-            while(reader.ready()){
-                reader.skip(1024);  //A guess at something larger than the buffer size of the BT adapter
+            while(reader.ready()) {
+                //A guess at something larger than the buffer size of the BT
+                //adapter
+                reader.skip(1024);
             }
-        } catch (IOException e) {}  //Disregard exceptions... This is only an attempt to clear the buffer
+        } catch(IOException e) {}
     }
 
     private String getResponse(BufferedReader reader){
         String line = "";
         try {
             line = mInStream.readLine();
-        } catch (IOException e) {
+        } catch(IOException e) {
             Log.e(TAG, "unable to read response");
             return null;
         }
-        if (line ==  null){
+        if(line == null){
             Log.e(TAG, "device has dropped offline");
             return null;
         }
