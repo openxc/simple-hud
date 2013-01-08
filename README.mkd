@@ -1,8 +1,8 @@
-# Bluetooth LED VU bar Documentation
+# Bluetooth HUD Documentation
 
-The LED VU bar is a battery powered Bluetooth microcontroller. The
+The Bluetooth HUD is a battery powered Bluetooth microcontroller. The
 microcontroller responds to serial commands sent from any Bluetooth master and
-operates the 5 green LEDs accordingly. The VU bar has an internal Li-Ion
+operates the 5 green LEDs accordingly. The Bluetooth HUD an internal Li-Ion
 battery which should last between 6 and 40 hours depending on how many LEDs are
 lit. The battery will be continuously charged by the solar panel if in the
 presence of sunlight. If a faster charge is needed, there is a USB Mini port on
@@ -49,7 +49,7 @@ power source while testing.
 
 ## Desktop Testing
 
-For testing purposes, the LED VU bar can also be communicated by a computer with
+For testing purposes, the Bluetooth HUD can also be communicated by a computer with
 a Bluetooth adapter. We have tested this in Ubuntu 10.10 with an integrated
 Bluetooth adapter. In theory, any computer that can connect to the SPP profile
 on a Bluetooth device can work. Our steps for communicating with the device
@@ -91,14 +91,14 @@ either `\n` or `M`. The following commands are accepted:
 ```
 
 For additional troubleshooting, there are two LEDs on the circuit board within
-the LED VU bar. LED6 (located just alongside the RN-42 chip) will blink when
+the Bluetooth HUD. LED6 (located just alongside the RN-42 chip) will blink when
 the Bluetooth chipset is discoverable, and will turn off when connected. LED7
 (opposite the RN42 from LED6, just behind the DC power jack) illustrates charge
 status. It will be lit solidly while charging, and will start to blink or dim
 as charging is completed. Unfortunately, the housing must be removed in order
 to get a clear view of these LEDs.
 
-The LED VU bar board can also be programmed as a Bluetooth arduino. Once
+The Bluetooth HUD can also be programmed as a Bluetooth arduino. Once
 connected to the SPP profile (step 5 above), the /dev/rfcommX port must be
 softlinked to a normal serial port in order for some versions of the arduino IDE
 to detect it. try "ln -s /dev/rfcommX /dev/ttyS50". You may need to run
@@ -162,7 +162,7 @@ input cap (C9) the circuit is reasonably good at harvesting solar power. See
 ladyada's writeup on MPPT for her solarlipo charger project
 (http://ladyada.net/products/usbdcsolarlipo/design.html).
 
-With the small solar panel installed on the LED VU board, we measured between
+With the small solar panel installed on the Bluetooth HUD, we measured between
 100-200mA under direct sunlight. A larger solar panel would be able to get
 closer to the 500mA maximum charge rate. If all of the LEDs are fully lit all
 the time, the LED board needs to be under direct sunlight in order to actually
