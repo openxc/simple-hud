@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.openxc.hardware</groupId>
+    <groupId>com.openxcplatform.hardware</groupId>
     <artifactId>hud-parent</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
@@ -22,12 +22,12 @@
             <dependency>
                 <groupId>com.google.android</groupId>
                 <artifactId>android</artifactId>
-                <version>4.0.1.2</version>
+                <version>4.1.1.4</version>
             </dependency>
             <dependency>
                 <groupId>com.google.android</groupId>
                 <artifactId>android-test</artifactId>
-                <version>4.0.1.2</version>
+                <version>4.1.1.4</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -39,39 +39,8 @@
                 <plugin>
                     <groupId>com.jayway.maven.plugins.android.generation2</groupId>
                     <artifactId>android-maven-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.3.0</version>
                     <extensions>true</extensions>
-                </plugin>
-                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            com.jayway.maven.plugins.android.generation2
-                                        </groupId>
-                                        <artifactId>
-                                            android-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [3.1.1,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>proguard</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore></ignore>
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -86,14 +55,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.10</version>
-                <configuration>
-                    <useFile>false</useFile>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>com.jayway.maven.plugins.android.generation2</groupId>
                 <artifactId>android-maven-plugin</artifactId>
                 <configuration>
@@ -104,11 +65,35 @@
                         </jvmArguments>
                     </dex>
                     <sdk>
-                        <platform>12</platform>
+                        <platform>17</platform>
                     </sdk>
-                    <undeployBeforeDeploy>true</undeployBeforeDeploy>
-                    <testDebug>false</testDebug>
+                    <undeployBeforeDeploy>false</undeployBeforeDeploy>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.10</version>
+                <configuration>
+                    <useFile>false</useFile>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/../libs</outputDirectory>
+                            <excludeScope>provided</excludeScope>
+                            <excludeArtifactIds>jsr305,openxc,openxc-it,openxc-examples,openxc-enabler</excludeArtifactIds>
+                            <excludeTransitive>true</excludeTransitive>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
