@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.openxc.hardware</groupId>
+        <groupId>com.openxcplatform.hardware</groupId>
         <artifactId>hud-parent</artifactId>
         <version>1.0</version>
     </parent>
